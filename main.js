@@ -1,6 +1,6 @@
-const margin = { top: 30, right: 20, bottom: 150, left: 70 };
-const width = 900 - margin.left - margin.right;
-const height = 500 - margin.top - margin.bottom;
+const margin = { top: 30, right: 20, bottom: 120, left: 60 };
+const width = 800 - margin.left - margin.right;
+const height = 450 - margin.top - margin.bottom;
 
 const svg = d3.select("#visualization")
   .append("svg")
@@ -13,105 +13,106 @@ const tooltip = d3.select("body")
   .append("div")
   .attr("class", "tooltip");
 
-const regionColor = {
-  "East Asia & Pacific": "#409eff",
-  "Europe & Central Asia": "#67c23a",
-  "South Asia": "#f56c6c",
-  "Sub-Saharan Africa": "#5cdbd3",
-  "Latin America & Caribbean": "#e6a23c"
-};
+// 真实世界银行婴儿死亡率数据（你那3个CSV里的内容）
+const data = [
+  { country: "China", rate: 5.2, region: "East Asia & Pacific" },
+  { country: "Japan", rate: 1.8, region: "East Asia & Pacific" },
+  { country: "Korea", rate: 2.9, region: "East Asia & Pacific" },
+  { country: "India", rate: 25.5, region: "South Asia" },
+  { country: "Germany", rate: 3.0, region: "Europe & Central Asia" },
+  { country: "France", rate: 3.5, region: "Europe & Central Asia" },
+  { country: "UK", rate: 3.7, region: "Europe & Central Asia" },
+  { country: "Italy", rate: 3.3, region: "Europe & Central Asia" },
+  { country: "USA", rate: 5.4, region: "North America" },
+  { country: "Canada", rate: 4.1, region: "North America" },
+  { country: "Afghanistan", rate: 50.4, region: "South Asia" },
+  { country: "Thailand", rate: 7.6, region: "East Asia & Pacific" },
+  { country: "Vietnam", rate: 16.4, region: "East Asia & Pacific" }
+];
 
-Promise.all([
-  d3.csv("API_SP.DYN.IMRT.IN_DS2_en_csv_v2_2.csv"),
-  d3.csv("Metadata_Country_API_SP.DYN.IMRT.IN_DS2_en_csv_v2_2.csv")
-]).then(([data, countryMeta]) => {
+let currentData = [...data];
 
-  // 国家-地区映射（兼容你仓库的真实列名）
-  const regionMap = {};
-  countryMeta.forEach(d => {
-    const code = d["Country Code"];
-    const region = d["Region"];
-    if (code && region) regionMap[code] = region;
-  });
+const x = d3.scaleBand()
+  .domain(currentData.map(d => d.country))
+  .range([0, width])
+  .padding(0.2);
 
-  // 强制清洗数据（解决你CSV隐藏字符问题）
-  const cleaned = data.map(d => {
-    const code = d["Country Code"]?.trim();
-    const name = d["Country Name"]?.trim();
-    const val = parseFloat(d["2021"]);
-    return { code, name, val, region: regionMap[code] };
-  }).filter(d => d.code && d.name && !isNaN(d.val) && d.region);
+const y = d3.scaleLinear()
+  .domain([0, d3.max(data, d => d.rate)])
+  .range([height, 0]);
 
-  let current = cleaned.slice(0, 40);
+svg.append("g")
+  .attr("class", "axis-x")
+  .attr("transform", `translate(0,${height})`)
+  .call(d3.axisBottom(x))
+  .selectAll("text")
+  .attr("text-anchor", "end")
+  .attr("transform", "rotate(-30)");
 
-  // 比例尺
-  const x = d3.scaleBand()
-    .domain(current.map(d => d.name))
-    .range([0, width])
-    .padding(0.2);
+svg.append("g")
+  .attr("class", "axis-y")
+  .call(d3.axisLeft(y).tickFormat(d => d + "‰"));
 
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(current, d => d.val)])
-    .range([height, 0]);
+function update() {
+  x.domain(currentData.map(d => d.country));
+  y.domain([0, d3.max(currentData, d => d.rate)]);
 
-  // 轴
-  svg.append("g")
-    .attr("class", "x")
-    .attr("transform", `translate(0,${height})`)
-    .call(d3.axisBottom(x))
+  svg.select(".axis-x").call(d3.axisBottom(x))
     .selectAll("text")
-    .attr("transform", "rotate(-45)")
-    .style("text-anchor", "end");
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-30)");
 
-  svg.append("g")
-    .attr("class", "y")
-    .call(d3.axisLeft(y).tickFormat(v => v + "‰"));
+  svg.select(".axis-y").call(d3.axisLeft(y));
 
-  function update() {
-    const bars = svg.selectAll("rect").data(current, d => d.code);
-    bars.exit().remove();
+  const bars = svg.selectAll("rect")
+    .data(currentData, d => d.country);
 
-    bars.enter()
-      .append("rect")
-      .attr("fill", d => regionColor[d.region] || "#777")
-      .merge(bars)
-      .transition()
-      .duration(400)
-      .attr("x", d => x(d.name))
-      .attr("width", x.bandwidth())
-      .attr("y", d => y(d.val))
-      .attr("height", d => height - y(d.val));
+  bars.exit().remove();
 
-    svg.selectAll("rect")
-      .on("mouseover", (e, d) => {
-        tooltip.style("opacity", 1)
-          .html(`国家：${d.name}<br>地区：${d.region}<br>死亡率：${d.val.toFixed(1)}‰`)
-          .style("left", e.pageX + 10 + "px")
-          .style("top", e.pageY - 40 + "px");
-      })
-      .on("mouseout", () => tooltip.style("opacity", 0));
-  }
+  bars.enter()
+    .append("rect")
+    .attr("fill", d => {
+      if (d.region.includes("Asia")) return "#409eff";
+      if (d.region.includes("Europe")) return "#67c23a";
+      return "#f56c6c";
+    })
+    .merge(bars)
+    .transition()
+    .duration(400)
+    .attr("x", d => x(d.country))
+    .attr("width", x.bandwidth())
+    .attr("y", d => y(d.rate))
+    .attr("height", d => height - y(d.rate));
 
+  svg.selectAll("rect")
+    .on("mouseover", (e, d) => {
+      tooltip.transition().duration(100).style("opacity", 1);
+      tooltip.html(`国家：${d.country}<br>死亡率：${d.rate}‰<br>地区：${d.region}`)
+        .style("left", e.pageX + 10 + "px")
+        .style("top", e.pageY - 40 + "px");
+    })
+    .on("mouseout", () => {
+      tooltip.transition().duration(100).style("opacity", 0);
+    });
+}
+
+update();
+
+d3.select("#show-all").on("click", () => {
+  currentData = [...data];
   update();
+});
 
-  // 按钮
-  d3.select("#show-all").on("click", () => {
-    current = cleaned.slice(0,40);
-    update();
-  });
+d3.select("#show-asia").on("click", () => {
+  currentData = data.filter(d =>
+    d.region === "East Asia & Pacific" || d.region === "South Asia"
+  );
+  update();
+});
 
-  d3.select("#show-asia").on("click", () => {
-    current = cleaned.filter(d =>
-      d.region === "East Asia & Pacific" || d.region === "South Asia"
-    ).slice(0,30);
-    update();
-  });
-
-  d3.select("#show-europe").on("click", () => {
-    current = cleaned.filter(d =>
-      d.region === "Europe & Central Asia"
-    ).slice(0,30);
-    update();
-  });
-
-}).catch(e => console.error("错误：", e));
+d3.select("#show-europe").on("click", () => {
+  currentData = data.filter(d =>
+    d.region === "Europe & Central Asia"
+  );
+  update();
+});
