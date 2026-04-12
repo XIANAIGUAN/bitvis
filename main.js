@@ -23,43 +23,61 @@ const regionColor = {
   "Sub-Saharan Africa": "#5cdbd3"
 };
 
+// 同时加载两个CSV
 Promise.all([
   d3.csv("API_SP.DYN.IMRT.IN_DS2_en_csv_v2_2.csv"),
   d3.csv("Metadata_Country_API_SP.DYN.IMRT.IN_DS2_en_csv_v2_2.csv")
 ]).then(([data, countryMeta]) => {
 
-  const countryToRegion = {};
-  countryMeta.forEach(row => {
-    const code = row["CountryCode"] || row["Country Code"];
-    const region = row["Region"];
-    if (code && region) countryToRegion[code] = region;
+  // 🔥修复点1：使用 trim() 去除表头空格，兼容各种格式的 CSV
+  const countryRegionMap = new Map();
+  countryMeta.forEach(item => {
+    const code = (item["Country Code"] || item["CountryCode"] || "").trim();
+    const region = (item["Region"] || "").trim();
+    if (code && region) {
+      countryRegionMap.set(code, region);
+    }
   });
 
-  const validRows = data.filter(row => {
-    const code = row["Country Code"];
-    const val = row["2021"];
-    return code && val && !isNaN(+val) && countryToRegion[code];
-  });
+  // 🔥修复点2：智能获取年份列（处理空格）
+  let targetYearColumn = "2021";
+  if (data.length > 0) {
+    const headers = Object.keys(data[0]);
+    const yearHeader = headers.find(h => h.trim().includes("2021")) || "2021";
+    targetYearColumn = yearHeader;
+  }
 
-  const processed = validRows.map(row => ({
-    country: row["Country Name"],
-    code: row["Country Code"],
-    region: countryToRegion[row["Country Code"]],
-    value: +row["2021"],
-    year: "2021"
-  })).sort((a, b) => a.value - b.value);
+  // 处理核心数据
+  const processedData = data
+    .map(item => ({
+      code: (item["Country Code"] || "").trim(),
+      name: (item["Country Name"] || "").trim(),
+      value: +item[targetYearColumn]
+    }))
+    .filter(item => {
+      // 过滤无效数据
+      return item.code && item.name && !isNaN(item.value) && item.value > 0 && countryRegionMap.has(item.code);
+    })
+    .map(item => ({
+      ...item,
+      region: countryRegionMap.get(item.code),
+      year: "2021"
+    }))
+    .sort((a, b) => a.value - b.value);
 
-  let current = [...processed];
+  let currentData = [...processedData];
 
+  // 绘制轴
   const x = d3.scaleBand()
-    .domain(current.map(d => d.country))
+    .domain(currentData.map(d => d.name))
     .range([0, width])
     .padding(0.2);
 
   const y = d3.scaleLinear()
-    .domain([0, d3.max(current, d => d.value)])
+    .domain([0, d3.max(currentData, d => d.value)])
     .range([height, 0]);
 
+  // X轴
   svg.append("g")
     .attr("class", "axis-x")
     .attr("transform", `translate(0,${height})`)
@@ -69,76 +87,87 @@ Promise.all([
     .attr("transform", "rotate(-45)")
     .style("font-size", "9px");
 
+  // Y轴
   svg.append("g")
     .attr("class", "axis-y")
     .call(d3.axisLeft(y).tickFormat(d => d + "‰"));
 
-  function update() {
-    x.domain(current.map(d => d.country));
-    y.domain([0, d3.max(current, d => d.value)]);
+  function updateChart() {
+    x.domain(currentData.map(d => d.name));
+    y.domain([0, d3.max(currentData, d => d.value)]);
 
-    svg.select(".axis-x").call(d3.axisBottom(x))
+    svg.select(".axis-x")
+      .transition()
+      .duration(500)
+      .call(d3.axisBottom(x))
       .selectAll("text")
       .attr("text-anchor", "end")
       .attr("transform", "rotate(-45)")
       .style("font-size", "9px");
 
-    svg.select(".axis-y").call(d3.axisLeft(y).tickFormat(d => d + "‰"));
-
-    const u = svg.selectAll("rect")
-      .data(current, d => d.code);
-
-    u.exit().remove();
-
-    u.enter()
-      .append("rect")
-      .merge(u)
+    svg.select(".axis-y")
       .transition()
-      .duration(400)
-      .attr("x", d => x(d.country))
-      .attr("y", d => y(d.value))
-      .attr("width", x.bandwidth())
-      .attr("height", d => height - y(d.value))
-      .attr("fill", d => regionColor[d.region] || "#888");
+      .duration(500)
+      .call(d3.axisLeft(y).tickFormat(d => d + "‰"));
 
+    const bars = svg.selectAll("rect")
+      .data(currentData, d => d.code);
+
+    bars.exit().remove();
+
+    const newBars = bars.enter()
+      .append("rect")
+      .attr("fill", d => regionColor[d.region] || "#ccc")
+      .attr("x", d => x(d.name))
+      .attr("width", x.bandwidth())
+      .attr("y", height)
+      .attr("height", 0);
+
+    newBars.merge(bars)
+      .transition()
+      .duration(500)
+      .attr("x", d => x(d.name))
+      .attr("y", d => y(d.value))
+      .attr("height", d => height - y(d.value))
+      .attr("fill", d => regionColor[d.region] || "#ccc");
+
+    // Tooltip 事件
     svg.selectAll("rect")
-      .on("mouseover", function (e, d) {
-        tooltip.transition().duration(100).style("opacity", 1);
-        tooltip.html(`
-          国家：${d.country}<br/>
-          地区：${d.region}<br/>
-          死亡率：${d.value.toFixed(2)}‰<br/>
-          年份：2021
-        `)
-        .style("left", (e.pageX + 10) + "px")
-        .style("top", (e.pageY - 30) + "px");
+      .on("mouseover", function(event, d) {
+        tooltip.style("opacity", 1)
+          .html(`国家：${d.name}<br>地区：${d.region}<br>死亡率：${d.value.toFixed(2)}‰<br>年份：${d.year}`)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 30) + "px");
       })
       .on("mouseout", () => {
-        tooltip.transition().duration(100).style("opacity", 0);
+        tooltip.style("opacity", 0);
       });
   }
 
-  update();
+  updateChart();
 
+  // 按钮事件
   d3.select("#show-all").on("click", () => {
-    current = [...processed];
-    update();
+    currentData = [...processedData];
+    updateChart();
   });
 
   d3.select("#show-asia").on("click", () => {
-    current = processed.filter(d =>
+    currentData = processedData.filter(d => 
       d.region === "East Asia & Pacific" || d.region === "South Asia"
     );
-    update();
+    updateChart();
   });
 
   d3.select("#show-europe").on("click", () => {
-    current = processed.filter(d =>
+    currentData = processedData.filter(d => 
       d.region === "Europe & Central Asia"
     );
-    update();
+    updateChart();
   });
 
 }).catch(err => {
-  console.error("加载数据失败：", err);
+  console.log("最终错误捕获：", err);
+  // 如果报错，在页面显示错误信息
+  document.body.innerHTML += "<div style='color:red; padding:20px;'>数据加载失败，请检查 CSV 文件是否存在！</div>";
 });
