@@ -3,29 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BITVIS Assignment 2 & Final Project</title>
+  <title>BITVIS 人口死亡率可视化</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>BITVIS 数据可视化作业2 & 期末大作业</h1>
-    <p class="subtitle">基于 D3.js 的交互式可视分析系统</p>
+    <h1>全球人口死亡率交互式可视化</h1>
+    <p class="subtitle">BITVIS 作业2 & 期末大作业</p>
 
     <div class="control-panel">
-      <button id="show-all">显示全部数据</button>
-      <button id="show-top10">显示前10项</button>
+      <button id="show-asia">亚洲国家</button>
+      <button id="show-europe">欧洲国家</button>
+      <button id="show-all">全部国家（2021年）</button>
     </div>
 
     <div id="visualization"></div>
 
     <div class="document">
-      <h2>作业说明文档（满足 Assignment 2 要求）</h2>
-      <p><strong>1. 可视化目标：</strong>通过交互式柱状图展示多类别数据分布，支持数据筛选与细节查看。</p>
-      <p><strong>2. 视觉编码：</strong>X 轴表示类别，Y 轴表示数值，颜色统一编码，高度映射数据大小。</p>
-      <p><strong>3. 交互设计：</strong>鼠标悬浮提示 Tooltip、按钮筛选数据、平滑过渡动画。</p>
-      <p><strong>4. 数据来源：</strong>模拟数据集，可替换为真实业务数据。</p>
-      <p><strong>5. 开发时长：</strong>作业2约2小时，期末大作业将扩展多视图联动与叙事可视化。</p>
+      <h2>说明文档</h2>
+      <p><strong>1. 可视化目标：</strong>展示全球各国人口死亡率分布，支持按地区筛选，辅助观察区域差异。</p>
+      <p><strong>2. 视觉编码：</strong>X轴为国家名称，Y轴为每1000人的死亡率，颜色区分地区，高度映射数值大小。</p>
+      <p><strong>3. 交互设计：</strong>鼠标悬浮显示具体国家+死亡率数值，按钮筛选不同地区数据。</p>
+      <p><strong>4. 数据来源：</strong>世界银行人口死亡率数据集。</p>
     </div>
   </div>
 
