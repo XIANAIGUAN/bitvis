@@ -2,88 +2,71 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Segoe UI', sans-serif;
 }
-
 body {
-  background-color: #f7f9fc;
-  padding: 20px 0;
+  background: #f6f8fa;
+  padding: 30px 0;
 }
-
 .container {
-  width: 1100px;
+  width: 1000px;
   margin: 0 auto;
   background: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
-
 h1 {
   text-align: center;
-  font-size: 24px;
   margin-bottom: 8px;
-  color: #222;
 }
-
 .subtitle {
   text-align: center;
   color: #666;
+  margin-bottom: 24px;
+}
+.question-box {
+  background: #eef7ff;
+  border-left: 4px #409eff solid;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  border-radius: 6px;
+}
+.controls {
+  text-align: center;
   margin-bottom: 30px;
 }
-
-.control-panel {
-  text-align: center;
-  margin-bottom: 25px;
-}
-
-.control-panel button {
-  padding: 9px 18px;
+.controls button {
+  padding: 10px 20px;
   margin: 0 8px;
   background: #409eff;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s;
 }
-
-.control-panel button:hover {
+.controls button:hover {
   background: #337ecc;
 }
-
 #visualization {
   display: flex;
-  justify-content: center;
-  overflow-x: auto; /* 适配多国家横向滚动 */
-  padding-bottom: 20px;
+  justify: center;
+  margin-bottom: 40px;
 }
-
+.doc-box {
+  line-height: 1.7;
+  color: #333;
+}
+.doc-box p {
+  margin-bottom: 10px;
+}
 .tooltip {
   position: absolute;
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
+  background: rgba(0,0,0,0.75);
+  color: white;
   padding: 6px 10px;
   border-radius: 4px;
   font-size: 12px;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.document {
-  margin-top: 50px;
-  line-height: 1.7;
-  color: #333;
-}
-
-.document h2 {
-  font-size: 18px;
-  margin-bottom: 12px;
-  color: #222;
-}
-
-.document p {
-  margin-bottom: 6px;
 }
