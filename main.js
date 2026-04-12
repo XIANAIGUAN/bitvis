@@ -13,7 +13,7 @@ const tooltip = d3.select("body")
   .append("div")
   .attr("class", "tooltip");
 
-// 真实世界银行婴儿死亡率数据（你那3个CSV里的内容）
+// 真实世界银行婴儿死亡率数据
 const data = [
   { country: "China", rate: 5.2, region: "East Asia & Pacific" },
   { country: "Japan", rate: 1.8, region: "East Asia & Pacific" },
@@ -69,13 +69,10 @@ function update() {
 
   bars.exit().remove();
 
+  // ✅ 统一蓝色 + 只有 hover 高亮（最干净版本）
   bars.enter()
     .append("rect")
-    .attr("fill", d => {
-      if (d.region.includes("Asia")) return "#409eff";
-      if (d.region.includes("Europe")) return "#67c23a";
-      return "#f56c6c";
-    })
+    .attr("fill", "#409eff")
     .merge(bars)
     .transition()
     .duration(400)
@@ -84,14 +81,17 @@ function update() {
     .attr("y", d => y(d.rate))
     .attr("height", d => height - y(d.rate));
 
+  // ✅ 悬浮高亮逻辑
   svg.selectAll("rect")
-    .on("mouseover", (e, d) => {
+    .on("mouseover", function(e, d) {
+      d3.select(this).attr("fill", "#337ecc");
       tooltip.transition().duration(100).style("opacity", 1);
       tooltip.html(`国家：${d.country}<br>死亡率：${d.rate}‰<br>地区：${d.region}`)
         .style("left", e.pageX + 10 + "px")
         .style("top", e.pageY - 40 + "px");
     })
-    .on("mouseout", () => {
+    .on("mouseout", function() {
+      d3.select(this).attr("fill", "#409eff");
       tooltip.transition().duration(100).style("opacity", 0);
     });
 }
