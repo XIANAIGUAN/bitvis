@@ -26,17 +26,25 @@
     <div id="visualization"></div>
 
     <div class="doc-box">
-      <h2>📄 说明文档</h2>
+      <h2>说明文档</h2>
       <p><strong>1. 可视化目标与研究问题</strong><br>
-         探索全球各国婴儿死亡率的分布差异，重点对比亚洲与欧洲国家，揭示不同地区医疗水平带来的死亡率差距。</p>
-      <p><strong>2. 视觉编码设计</strong><br>
-         X轴：国家名称；Y轴：婴儿死亡率（‰）；颜色：按地区区分；高度：数值大小映射。</p>
-      <p><strong>3. 交互设计</strong><br>
-         ① 地区筛选按钮；② 鼠标悬浮提示详情；③ 动态过渡动画。</p>
-      <p><strong>4. 数据来源</strong><br>
-         World Bank Open Data | 婴儿死亡率数据集 API_SP.DYN.IMRT.IN</p>
-      <p><strong>5. 开发过程</strong><br>
-         总耗时：6小时；最困难环节：CSV数据清洗与D3数据绑定。</p>
+      本可视化作品旨在分析<strong>全球不同国家婴儿死亡率的分布差异</strong>，重点探索<strong>亚洲与欧洲国家之间的健康水平差距</strong>，并通过交互方式直观展示地区间的数据规律，帮助观察者理解经济、政策、医疗条件等因素与婴儿死亡率的关联。</p>
+    
+      <p><strong>2. 设计决策依据（可视化编码与交互）</strong><br>
+      • 视觉编码：使用<strong>柱状图</strong>展示婴儿死亡率，Y轴映射死亡率数值，X轴展示国家名称，颜色统一使用蓝色以保证视觉整洁。<br>
+      • 交互设计：采用<strong>地区筛选按钮</strong> + <strong>鼠标悬浮提示</strong> + <strong>过渡动画</strong>三种交互，满足作业要求并提升可读性。<br>
+      • 替代方案：曾考虑折线图、散点图，但因数据为国家类别对比，柱状图在类别比较中更清晰易懂，因此最终选择柱状图。</p>
+    
+      <p><strong>3. 外部资源与数据来源</strong><br>
+      • 数据集：世界银行公开数据集（World Bank Open Data）<br>
+      • 指标名称：Mortality rate, infant (per 1,000 live births) <br>
+      • 技术框架：D3.js v7 官方库<br>
+      • 没有基于其他可视化案例进行改编，为本人独立设计实现。</p>
+    
+      <p><strong>4. 开发流程概述</strong><br>
+      • 总开发耗时：约 <strong>6小时</strong><br>
+      • 耗时最多环节：<strong>CSV 数据清洗与格式适配</strong>（处理世界银行原始文件格式）、<strong>D3 数据绑定与动态更新</strong>。<br>
+      • 开发过程：从数据读取、图表绘制、交互实现到界面美化逐步完成，整体流程顺畅，交互逻辑调试花费时间较多。</p>
     </div>
   </div>
 
