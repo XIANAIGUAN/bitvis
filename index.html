@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BITVIS Assignment 2 & Final Project</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>BITVIS 数据可视化作业2 & 期末大作业</h1>
+    <p class="subtitle">基于 D3.js 的交互式可视分析系统</p>
+
+    <div class="control-panel">
+      <button id="show-all">显示全部数据</button>
+      <button id="show-top10">显示前10项</button>
+    </div>
+
+    <div id="visualization"></div>
+
+    <div class="document">
+      <h2>作业说明文档（满足 Assignment 2 要求）</h2>
+      <p><strong>1. 可视化目标：</strong>通过交互式柱状图展示多类别数据分布，支持数据筛选与细节查看。</p>
+      <p><strong>2. 视觉编码：</strong>X 轴表示类别，Y 轴表示数值，颜色统一编码，高度映射数据大小。</p>
+      <p><strong>3. 交互设计：</strong>鼠标悬浮提示 Tooltip、按钮筛选数据、平滑过渡动画。</p>
+      <p><strong>4. 数据来源：</strong>模拟数据集，可替换为真实业务数据。</p>
+      <p><strong>5. 开发时长：</strong>作业2约2小时，期末大作业将扩展多视图联动与叙事可视化。</p>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
